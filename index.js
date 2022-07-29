@@ -60,16 +60,13 @@ function addDepartment() {
                 message: 'Enter the department name'
             }
         ])
-        .then(function (response) {
-            var query = 
-            `INSERT INTO departments (department_name)
-            VALUES ('{$response.departmentName}')`;
-            db.query(query, function (err, res) {
-                console.log(
-                    `Added department ${response.departmentName}`
-                    );
-            });
-            choicesPrompt();
+        .then((response) => {
+            connection.query(`INSERT INTO departments (name) VALUES ('${response.departmentName}')`, 
+            (err, res) => {
+                if (err) throw err;
+                console.log(`\n ${response.departmentName} has been added. \n`);
+                choicesPrompt();
+            })
         })
 };
 // function addRole() {
