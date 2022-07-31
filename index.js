@@ -47,31 +47,74 @@ function viewDepartments() {
     
 // }
 
-// function viewRoles() {
-    
-// }
+function viewRoles() {
+    connection.query(`SELECT roles.role_id, roles.role_name, roles.salary, departments.department_name, departments.department_id FROM roles JOIN departments ON roles.department_id = departments.department_id;`, (err, res) => {
+        if (err) throw err;
+        console.table(res);
+        choicesPrompt();
+    })
+}
+
 //functions for adding/updating with inquirer
 function addDepartment() {
     return inquirer
         .prompt ([
             {
                 type: 'input',
-                name: 'departmentName',
+                name: 'department_name',
                 message: 'Enter the department name'
             }
         ])
         .then((response) => {
-            connection.query(`INSERT INTO departments (name) VALUES ('${response.departmentName}')`, 
+            connection.query(`INSERT INTO departments (name) VALUES ('${response.department_name}')`, 
             (err, res) => {
                 if (err) throw err;
-                console.log(`\n ${response.departmentName} has been added. \n`);
+                console.log(`\n ${response.department_name} has been added. \n`);
                 choicesPrompt();
             })
         })
 };
-// function addRole() {
-    
-// }
+function addRole() {
+    connection.query(`SELECT * FROM departments;`, (err, res) => {
+        if (err) throw err;
+        let roleDepartment = res.map(departments => ({name: departments.department_name, value: departments.department_id}));
+        inquirer
+            .prompt([
+                {
+                    name: 'departmentName',
+                    type: 'list',
+                    message: 'Which department does this role belong to?',
+                    choices: roleDepartment
+                },
+                {
+                    name: 'role_name',
+                    type: 'input',
+                    message: 'What is the name of the role?'
+                },
+                {
+                    name: 'role_salary',
+                    type: 'input',
+                    message: 'What is the salary for this role?',
+                    validate: (salaryValue) => {
+                        if (isNaN(salaryValue)) {
+                            console.log('Enter a numerical value');
+                            return false;
+                        } else {
+                            return true;
+                        }
+                    }
+                }
+            ])
+            .then((response) => {
+                connection.query(`INSERT INTO roles (role_name, salary, department_id) VALUES ('${response.role_name}', '${response.role_salary}', '${response.departmentName}')`,
+                (err, res) => {
+                    if (err) throw err;
+                    console.log(`\n ${response.role_name} has been added. \n`);
+                    choicesPrompt();
+                })
+            })
+    })
+}
 
 // function addEmployee() {
     
