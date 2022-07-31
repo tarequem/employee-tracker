@@ -44,7 +44,7 @@ function viewDepartments() {
 }
 
 function viewEmployees() {
-    connection.query(`SELECT employees.employee_id, employees.first_name, employees.last_name, roles.role_id, departments.department_name, departments.department_id, roles.salary, employees.manager_id FROM employees JOIN roles ON employees.role_id = roles.role_id JOIN departments ON roles.department_id = departments.department_id;`, (err, res) => {
+    connection.query(`SELECT employees.employee_id, employees.first_name, employees.last_name, roles.role_id, roles.role_name, departments.department_name, departments.department_id, roles.salary, employees.manager_id FROM employees JOIN roles ON employees.role_id = roles.role_id JOIN departments ON roles.department_id = departments.department_id;`, (err, res) => {
         if (err) throw err;
         console.table(res);
         choicesPrompt();
@@ -52,7 +52,7 @@ function viewEmployees() {
 }
 
 function viewRoles() {
-    connection.query(`SELECT roles.role_id, roles.role_name, roles.salary, departments.department_name, departments.department_id FROM roles JOIN departments ON roles.department_id = departments.department_id;`, (err, res) => {
+    connection.query(`SELECT roles.role_id, roles.role_name, roles.salary, departments.department_id, departments.department_name FROM roles JOIN departments ON roles.department_id = departments.department_id;`, (err, res) => {
         if (err) throw err;
         console.table(res);
         choicesPrompt();
@@ -120,9 +120,49 @@ function addRole() {
     })
 }
 
-// function addEmployee() {
-    
-// }
+function addEmployee() {
+    connection.query(`SELECT * FROM roles;`, (err, res) => {
+        if (err) throw err;
+        let employeeRole = res.map(roles => ({ name: roles.role_name, value: roles.role_id}));
+        connection.query(`SELECT * FROM employees;`, (err, res) => {
+            if (err) throw err;
+            let employeeList = res.map(employees => ({name: employees.first_name + ' ' + employees.last_name, value: employees.employee_id}));
+            inquirer
+                .prompt([
+                    {
+                        name: 'first_name',
+                        type: 'input',
+                        message: "What is the employee's first name?"
+                    },
+                    {
+                        name: 'last_name',
+                        type: 'input',
+                        message: "What is the employee's last name?"
+                    },
+                    {
+                        name: 'role',
+                        type: 'list',
+                        message: "What is the employee's role?",
+                        choices: employeeRole
+                    },
+                    {
+                        name: 'manager',
+                        type: 'list',
+                        message: "Who is the employee's manager?",
+                        choices: employeeList
+                    }
+                ])
+                .then((response) => {
+                    connection.query(`INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES ('${response.first_name}', '${response.last_name}', '${response.role}', '${response.manager}')`,
+                    (err, res) => {
+                        if (err) throw err;
+                        console.log(`\n ${response.first_name} has been added. \n`);
+                        choicesPrompt();
+                    })
+                })
+        })
+    })
+}
 
 // function updateEmployee() {
     
