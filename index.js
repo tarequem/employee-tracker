@@ -43,9 +43,13 @@ function viewDepartments() {
     })
 }
 
-// function viewEmployees() {
-    
-// }
+function viewEmployees() {
+    connection.query(`SELECT employees.employee_id, employees.first_name, employees.last_name, roles.role_id, departments.department_name, departments.department_id, roles.salary, employees.manager_id FROM employees JOIN roles ON employees.role_id = roles.role_id JOIN departments ON roles.department_id = departments.department_id;`, (err, res) => {
+        if (err) throw err;
+        console.table(res);
+        choicesPrompt();
+    })
+}
 
 function viewRoles() {
     connection.query(`SELECT roles.role_id, roles.role_name, roles.salary, departments.department_name, departments.department_id FROM roles JOIN departments ON roles.department_id = departments.department_id;`, (err, res) => {
