@@ -1,9 +1,16 @@
 const inquirer = require('inquirer');
 const db = require('./db/connection');
 const connection = require('./db/connection');
+const cTable = require("console.table");
 
-//function to initialize inquirer and present options
+//function to initialize inquirer and present options (viewing database, adding to database, closing program)
 const choicesPrompt = () => {
+    console.log 
+    (`
+    ++++++++++++++++++++
+     MY EMPLOYEE TRACKER
+    ++++++++++++++++++++
+    `)
     return inquirer
         .prompt ([
             {
@@ -34,7 +41,7 @@ const choicesPrompt = () => {
         })
 }
 
-//functions for viewing 
+//view departments in database
 function viewDepartments() {
     connection.query(`SELECT * FROM departments;`, (err, res) => {
         if (err) throw err;
@@ -43,14 +50,7 @@ function viewDepartments() {
     })
 }
 
-function viewEmployees() {
-    connection.query(`SELECT employees.employee_id, employees.first_name, employees.last_name, roles.role_id, roles.role_name, departments.department_name, departments.department_id, roles.salary, employees.manager_id FROM employees JOIN roles ON employees.role_id = roles.role_id JOIN departments ON roles.department_id = departments.department_id;`, (err, res) => {
-        if (err) throw err;
-        console.table(res);
-        choicesPrompt();
-    })
-}
-
+//view roles in database
 function viewRoles() {
     connection.query(`SELECT roles.role_id, roles.role_name, roles.salary, departments.department_id, departments.department_name FROM roles JOIN departments ON roles.department_id = departments.department_id;`, (err, res) => {
         if (err) throw err;
@@ -59,7 +59,16 @@ function viewRoles() {
     })
 }
 
-//functions for adding/updating with inquirer
+//view employees in database
+function viewEmployees() {
+    connection.query(`SELECT employees.employee_id, employees.first_name, employees.last_name, roles.role_id, roles.role_name, departments.department_name, departments.department_id, roles.salary, employees.manager_id FROM employees JOIN roles ON employees.role_id = roles.role_id JOIN departments ON roles.department_id = departments.department_id;`, (err, res) => {
+        if (err) throw err;
+        console.table(res);
+        choicesPrompt();
+    })
+}
+
+//add departments to database
 function addDepartment() {
     return inquirer
         .prompt ([
@@ -70,7 +79,7 @@ function addDepartment() {
             }
         ])
         .then((response) => {
-            connection.query(`INSERT INTO departments (name) VALUES ('${response.department_name}')`, 
+            connection.query(`INSERT INTO departments (department_name) VALUES ('${response.department_name}')`, 
             (err, res) => {
                 if (err) throw err;
                 console.log(`\n ${response.department_name} has been added. \n`);
@@ -78,6 +87,8 @@ function addDepartment() {
             })
         })
 };
+
+//add roles to database
 function addRole() {
     connection.query(`SELECT * FROM departments;`, (err, res) => {
         if (err) throw err;
@@ -101,7 +112,7 @@ function addRole() {
                     message: 'What is the salary for this role?',
                     validate: (salaryValue) => {
                         if (isNaN(salaryValue)) {
-                            console.log('Enter a numerical value');
+                            console.log('\n Enter a numerical value \n');
                             return false;
                         } else {
                             return true;
@@ -120,6 +131,7 @@ function addRole() {
     })
 }
 
+//add employees to database
 function addEmployee() {
     connection.query(`SELECT * FROM roles;`, (err, res) => {
         if (err) throw err;
@@ -164,6 +176,7 @@ function addEmployee() {
     })
 }
 
+//update the roles of employees
 function updateEmployeeRole() {
     connection.query(`SELECT * FROM roles;`, (err, res) => {
         if (err) throw err;
