@@ -27,7 +27,7 @@ const choicesPrompt = () => {
             }else if (chosenPrompt.option === 'add an employee') {
                 addEmployee();
             }else if (chosenPrompt.option === 'update an employee role') {
-                updateEmployee();
+                updateEmployeeRole();
             } else  if (chosenPrompt.option === 'close program') {
                 db.end();
             }
@@ -164,8 +164,52 @@ function addEmployee() {
     })
 }
 
-// function updateEmployee() {
-    
-// }
+function updateEmployeeRole() {
+    connection.query(`SELECT * FROM roles;`, (err, res) => {
+        if (err) throw err;
+        let employeeRole = res.map(roles => ({ name: roles.role_name, value: roles.role_id}));
+        connection.query(`SELECT * FROM employees;`, (err, res) => {
+            if (err) throw err;
+            let employeeList = res.map(employees => ({name: employees.first_name + ' ' + employees.last_name, value: employees.employee_id}));
+            inquirer
+                .prompt([
+                    {
+                        name: 'employee',
+                        type: 'list',
+                        message: "Which employee is having their role updated?",
+                        choices: employeeList
+                    },
+                    {
+                        name: 'updatedRole',
+                        type: 'list',
+                        message: "Which role will be added to?",
+                        choices: employeeRole
+                    }
+                ])
+                .then((response) => {
+                    connection.query(`UPDATE employees SET ? WHERE ?`,
+                    [
+                        {
+                            role_id: response.updatedRole
+                        },
+                        {
+                            employee_id: response.employee
+                        }
+                    ],
+                    (err, res) => {
+                        if (err) throw err;
+                        console.log(`\n The role has been updated. \n`);
+                        choicesPrompt();
+                    })
+                })
+        })
+    })
+}
+
+// function for updating employee managers
+// function for viewing employees by manager
+// function for viewing employees by department
+// function for deleting departments, roles, and employees
+// function for viewing the total utilized budget of a department—in other words, the combined salaries of all employees in that department
 
 choicesPrompt();
