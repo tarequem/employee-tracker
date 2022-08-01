@@ -1,7 +1,7 @@
 const inquirer = require('inquirer');
 const db = require('./db/connection');
 const connection = require('./db/connection');
-const cTable = require("console.table");
+const cTable = require('console.table');
 
 //function to initialize inquirer and present options (viewing database, adding to database, closing program)
 const choicesPrompt = () => {
